@@ -1,0 +1,10 @@
+dependencies:
+  idf: '>=5.0'
+description: C++ library for Google Protobuf
+documentation: https://protobuf.dev/
+license: MIT
+repository: https://github.com/albkharisov/esp_google_protobuf
+tags:
+- protobuf
+url: https://protobuf.dev/
+version: 1.0.0

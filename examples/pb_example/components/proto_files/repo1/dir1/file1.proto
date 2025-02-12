@@ -1,0 +1,26 @@
+syntax = "proto3";
+package example;
+
+import "google/protobuf/any.proto";
+import "repo2/logs.proto";
+
+message SubMessage {
+  int32 val = 1;
+}
+
+message foo {
+  int32 bar = 1;
+
+  google.protobuf.Any val = 2;
+
+  optional string s = 3;
+  optional bytes b = 4;
+
+  oneof test_oneof {
+    string name = 5;
+    SubMessage sub_message = 6;
+  }
+
+  extlib.msg1 m1 = 7;
+}
+

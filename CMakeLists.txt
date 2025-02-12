@@ -1,0 +1,60 @@
+idf_component_register(
+    INCLUDE_DIRS
+        protobuf/src
+)
+
+option(BUILD_SHARED_LIBS OFF)
+option(protobuf_BUILD_SHARED_LIBS OFF)
+option(protobuf_BUILD_TESTS OFF)
+option(protobuf_BUILD_CONFORMANCE OFF)
+option(protobuf_BUILD_PROTOC_BINARIES OFF)
+option(protobuf_WITH_ZLIB OFF)
+option(protobuf_DISABLE_RTTI ON)
+option(protobuf_INSTALL OFF)
+option(protobuf_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/protobuf)
+
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/local_include")
+add_subdirectory(protobuf/cmake)
+
+add_library(alloc_pb src/alloc_pb.cpp)
+
+set(PROTO_LIB_NAME libprotobuf-lite)
+target_compile_options(${PROTO_LIB_NAME} PUBLIC -Wno-deprecated-enum-enum-conversion)
+
+set(INPUT_LIB_PB ${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake/${PROTO_LIB_NAME}.a)
+set(OUTPUT_LIB_PB ${CMAKE_BINARY_DIR}/${PROTO_LIB_NAME}.alloc8.a)
+set(OBJCOPY xtensa-esp32-elf-objcopy)
+
+# google-protobuf requires allocated memory by 8, so redefine operator new
+# to allocate 8 bytes only for this library
+add_custom_command(OUTPUT ${OUTPUT_LIB_PB}
+     COMMAND ${OBJCOPY} ${INPUT_LIB_PB} --redefine-sym _Znwj=__wrap_new8 --redefine-sym _ZdlPv=__wrap_delete8 ${OUTPUT_LIB_PB}
+     DEPENDS ${PROTO_LIB_NAME}
+     COMMENT "Creating ${PROTO_LIB_NAME} with wrapped new/delete"
+     VERBATIM)
+
+add_custom_target(fixed_pb DEPENDS ${OUTPUT_LIB_PB})
+add_dependencies(${COMPONENT_LIB} fixed_pb)
+
+set_property(DIRECTORY "${COMPONENT_DIR}" APPEND PROPERTY
+     ADDITIONAL_CLEAN_FILES ${OUTPUT_LIB_PB})
+
+target_link_libraries(${COMPONENT_LIB} INTERFACE
+    ${OUTPUT_LIB_PB}
+    alloc_pb
+)
+
+set(PROTOC_BINARY_DIR "${CMAKE_BINARY_DIR}/protoc_host_build")
+
+externalproject_add(protoc_host
+    PREFIX ${PROTOC_BINARY_DIR}
+    SOURCE_DIR ${COMPONENT_DIR}/protobuf/cmake
+    CONFIGURE_COMMAND cmake --log-level=ERROR -S${COMPONENT_DIR}/protobuf/cmake -DCMAKE_RULE_MESSAGES=OFF -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=OFF -DBUILD_SHARED_LIBS=OFF -Dprotobuf_WITH_ZLIB=OFF -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_CONFORMANCE=OFF -Dprotobuf_DISABLE_RTTI=ON -Dprotobuf_BUILD_PROTOC_BINARIES=ON -DWITH_PROTOC=OFF
+
+    BUILD_IN_SOURCE 0
+    BINARY_DIR ${PROTOC_BINARY_DIR}
+    BUILD_COMMAND cmake --build . --parallel
+    INSTALL_COMMAND cp ${PROTOC_BINARY_DIR}/protoc ${CMAKE_BINARY_DIR}
+)
+
