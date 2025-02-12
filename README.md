@@ -42,6 +42,7 @@ esp-idf/proto_files/libproto_files.a(file1.pb.cc.obj): in function `_ZNK6google8
 /home/albert/esp_google_protobuf/examples/pb_example/managed_components/albkharisov__esp_google_protobuf/protobuf/src/google/protobuf/metadata_lite.h:138:(.text._ZN6google8protobuf8internal16InternalMetadata9MergeFromINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEEvRKS2_[_ZN6google8protobuf8internal16InternalMetadata9MergeFromINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEEEvRKS2_]+0x18): dangerous relocation: windowed longcall crosses 1GB boundary; return may fail: *UND*
 ```
 So please enable optimization to avoid it.
+[Issue in esp-idf repo](https://github.com/espressif/esp-idf/issues/15381)
 
 ## Warning 2
 
