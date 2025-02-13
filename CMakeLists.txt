@@ -13,14 +13,13 @@ option(protobuf_DISABLE_RTTI ON)
 option(protobuf_INSTALL OFF)
 option(protobuf_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/protobuf)
 
-
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/local_include")
 add_subdirectory(protobuf/cmake EXCLUDE_FROM_ALL)
 
 add_library(alloc_pb src/alloc_pb.cpp)
 
 set(PROTO_LIB_NAME libprotobuf-lite)
 target_compile_options(${PROTO_LIB_NAME} PUBLIC -Wno-deprecated-enum-enum-conversion)
+target_include_directories(${PROTO_LIB_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/local_include")
 
 set(INPUT_LIB_PB ${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake/${PROTO_LIB_NAME}.a)
 set(OUTPUT_LIB_PB ${CMAKE_BINARY_DIR}/${PROTO_LIB_NAME}.alloc8.a)
@@ -50,11 +49,11 @@ set(PROTOC_BINARY_DIR "${CMAKE_SOURCE_DIR}/build_host_protoc")
 externalproject_add(protoc_host
     PREFIX ${PROTOC_BINARY_DIR}
     SOURCE_DIR ${COMPONENT_DIR}/protobuf/cmake
-    CONFIGURE_COMMAND cmake --log-level=ERROR -S${COMPONENT_DIR}/protobuf/cmake -DCMAKE_RULE_MESSAGES=OFF -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=OFF -DBUILD_SHARED_LIBS=OFF -Dprotobuf_WITH_ZLIB=OFF -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_CONFORMANCE=OFF -Dprotobuf_DISABLE_RTTI=ON -Dprotobuf_BUILD_PROTOC_BINARIES=ON -DWITH_PROTOC=OFF
+    CONFIGURE_COMMAND cmake --log-level=ERROR -S${COMPONENT_DIR}/protobuf/cmake -DCMAKE_RULE_MESSAGES=OFF -DCMAKE_BUILD_TYPE=Release -Dprotobuf_BUILD_SHARED_LIBS=OFF -DBUILD_SHARED_LIBS=OFF -Dprotobuf_WITH_ZLIB=OFF -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_CONFORMANCE=OFF -Dprotobuf_DISABLE_RTTI=ON -Dprotobuf_BUILD_PROTOC_BINARIES=ON -DWITH_PROTOC=OFF -DCMAKE_CXX_FLAGS="-w"
 
     BUILD_IN_SOURCE 0
     BINARY_DIR ${PROTOC_BINARY_DIR}
-    BUILD_COMMAND cmake --build . --parallel
+    BUILD_COMMAND cmake --build . --target protoc --parallel
     INSTALL_COMMAND ""
     BUILD_BYPRODUCTS ${PROTOC_BINARY_DIR}/protoc
 )
