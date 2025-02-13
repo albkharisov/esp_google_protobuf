@@ -8,7 +8,7 @@ if(NOT CMAKE_BUILD_EARLY_EXPANSION)
     )
     list(APPEND PROTO_DIRS
        repo1
-       third_party
+       third_party/repo2
     )
 
     discover_proto_files(proto_SOURCES generated_SOURCES "${PROTO_DIRS}" ${GENERATED_DIR} ${ADDITIONAL_PROTO})

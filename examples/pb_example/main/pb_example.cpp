@@ -1,6 +1,6 @@
-#include "dir1/file1.pb.h"
+#include "file1.pb.h"
 #include "google/protobuf/any.pb.h"
-#include "repo2/logs.pb.h"
+#include "logs.pb.h"
 #include "esp_log.h"
 
 static const char* const tag = "pb_example";
