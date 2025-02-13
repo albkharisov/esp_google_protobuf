@@ -42,5 +42,5 @@ idf_component_register(
         albkharisov__esp_google_protobuf
 )
 
-registrate_proto_generation("${PROTO_DIRS}" "${proto_SOURCES}" ${GENERATED_DIR})
+add_proto_generation("${PROTO_DIRS}" "${proto_SOURCES}" ${GENERATED_DIR})
 

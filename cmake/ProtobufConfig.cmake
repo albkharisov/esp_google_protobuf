@@ -21,7 +21,7 @@ function(discover_proto_files out_proto out_sources proto_dirs generated_dir add
     set(${out_sources} ${generated_SOURCES} PARENT_SCOPE)
 endfunction()
 
-function(registrate_proto_generation proto_dirs proto_sources generated_dir)
+function(add_proto_generation proto_dirs proto_sources generated_dir)
     list(APPEND PROTO_PATHS
         ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../protobuf/src
         .
@@ -30,7 +30,7 @@ function(registrate_proto_generation proto_dirs proto_sources generated_dir)
     list(TRANSFORM PROTO_PATHS PREPEND "--proto_path=")
 
     set(DONE_FILE "${CMAKE_BINARY_DIR}/protoc_build_done")
-    set(PROTOC ${CMAKE_BINARY_DIR}/protoc)
+    set(PROTOC "${CMAKE_SOURCE_DIR}/build_host_protoc/protoc")
     set(CPP_OUT --cpp_out=lite:${generated_dir})
 
     set(CMD
@@ -50,7 +50,7 @@ function(registrate_proto_generation proto_dirs proto_sources generated_dir)
     add_custom_command(
         OUTPUT "${DONE_FILE}"
         COMMAND ${CMD}
-        DEPENDS protoc_host
+        DEPENDS ${PROTOC}
         COMMENT "${Yellow} Generating CXX files from proto-files ${ColourReset}"
         VERBATIM
     )

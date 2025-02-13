@@ -15,7 +15,7 @@ option(protobuf_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/protobuf)
 
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/local_include")
-add_subdirectory(protobuf/cmake)
+add_subdirectory(protobuf/cmake EXCLUDE_FROM_ALL)
 
 add_library(alloc_pb src/alloc_pb.cpp)
 
@@ -45,7 +45,7 @@ target_link_libraries(${COMPONENT_LIB} INTERFACE
     alloc_pb
 )
 
-set(PROTOC_BINARY_DIR "${CMAKE_BINARY_DIR}/protoc_host_build")
+set(PROTOC_BINARY_DIR "${CMAKE_SOURCE_DIR}/build_host_protoc")
 
 externalproject_add(protoc_host
     PREFIX ${PROTOC_BINARY_DIR}
@@ -55,6 +55,7 @@ externalproject_add(protoc_host
     BUILD_IN_SOURCE 0
     BINARY_DIR ${PROTOC_BINARY_DIR}
     BUILD_COMMAND cmake --build . --parallel
-    INSTALL_COMMAND cp ${PROTOC_BINARY_DIR}/protoc ${CMAKE_BINARY_DIR}
+    INSTALL_COMMAND ""
+    BUILD_BYPRODUCTS ${PROTOC_BINARY_DIR}/protoc
 )
 

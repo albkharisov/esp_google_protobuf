@@ -4,9 +4,11 @@ This is a wrapper for Google Protobuf library version v3.20.3 (29/09/2022).
 I haven't managed to port last version, since it depends on Abseil,
 and porting abseil is not easy. Currently lite version is supported.
 
+
 ## What is Protobuf?
 
 Protocol Buffers are language-neutral, platform-neutral extensible mechanisms for serializing structured data.
+
 
 ## What this library does?
 
@@ -19,9 +21,15 @@ to allocate 8-bytes aligned memory
 * produces `*.pb.cc` / `*.pb.h` files from found `*.proto` with `protoc`
 * creates list of generated sources to be used in `idf_component_register()`
 
+
 ## Using
 
-There is an example in `example` directory.
+Call to these functions in CMakeLists.txt of you component this order:
+
+1. `discover_proto_files()` - find proto-files
+2. `idf_component_register()` - use these files as a sources
+3. `add_proto_generation()` - add generation of CXX files
+
 Script automatically finds all `*.proto` files recursively, and
 you can add necessary built-in proto-files (like `any.proto`) manually.
 You should specify all directories to search. Generated files are
@@ -32,6 +40,18 @@ but you can use build directory as an output like this:
 set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 ```
 But it's not convenient if you generate `compile_commands.json` with clang compiler.
+
+Pay an attention to PROTO_DIRS argument of `discover_proto_files()`:
+function searches for all proto-files inside component directory which called this function
+and then throw out all files don't belong to PROTO_DIRS, so you shouldn't specify
+subdir of mentioned already mentioned directory.
+Also it's crucial to put correct dir names for PROTO_DIRS since `protoc` makes strict
+search in *exact* directories.
+
+Function `add_proto_generation()` adds dependency to current component for generating
+CXX files: `*.pb.cc` / `*.pb.h`, so they are generated before building this component.
+Also this function depends on building `protoc` on your host system, which is used
+for generating CXX files.
 
 
 ## Warning 1
@@ -44,11 +64,13 @@ esp-idf/proto_files/libproto_files.a(file1.pb.cc.obj): in function `_ZNK6google8
 So please enable optimization to avoid it.
 [Issue in esp-idf repo](https://github.com/espressif/esp-idf/issues/15381)
 
+
 ## Warning 2
 
 Protobuf library expects to have 8-bytes aligned addresses to use, so don't pass non-8-aligned
 addresses otherwise you can get assert in inner files. It's better to use inner allocation
 because it uses aligned addresses.
+
 
 ## Warning 3
 
