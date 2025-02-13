@@ -42,5 +42,7 @@ idf_component_register(
         albkharisov__esp_google_protobuf
 )
 
+# comment this if you want to keep generated CXX files in git index
+# and don't want to build protoc and generate proto files each time.
 add_proto_generation("${PROTO_DIRS}" "${proto_SOURCES}" ${GENERATED_DIR})
 

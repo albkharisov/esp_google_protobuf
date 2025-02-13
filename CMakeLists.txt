@@ -56,5 +56,6 @@ externalproject_add(protoc_host
     BUILD_COMMAND cmake --build . --target protoc --parallel
     INSTALL_COMMAND ""
     BUILD_BYPRODUCTS ${PROTOC_BINARY_DIR}/protoc
+    EXCLUDE_FROM_ALL TRUE
 )
 

@@ -53,6 +53,12 @@ CXX files: `*.pb.cc` / `*.pb.h`, so they are generated before building this comp
 Also this function depends on building `protoc` on your host system, which is used
 for generating CXX files.
 
+## protoc host build
+
+Using `add_proto_generation()` triggers host build of `protoc` which requires
+host build environment: cmake and compiler. But they can be absent (like in CI).
+In this case you can generate CXX files locally, add them into git-index,
+and comment `add_proto_generation()` - this will exclude `protoc` host build.
 
 ## Warning 1
 
