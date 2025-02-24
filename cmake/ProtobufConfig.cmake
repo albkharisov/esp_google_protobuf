@@ -1,11 +1,21 @@
+if(DEFINED Protobuf_FOUND)
+    return()
+endif()
+set(Protobuf_FOUND TRUE)
+set(PROTOC "${CMAKE_SOURCE_DIR}/build_host_protoc/protoc")
+
+set(Protobuf_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../protobuf/src/include")
+set(Protobuf_LIBRARIES protobuf::libprotobuf-lite)
+set(Protobuf_PROTOC_EXECUTABLE ${PROTOC})
+
 function(discover_proto_files out_proto out_sources proto_dirs generated_dir additional_proto)
     file(GLOB_RECURSE proto_SOURCES *.proto)
     set(proto_SOURCES_REL "")
 
     foreach(FILE ${proto_SOURCES})
         foreach(DIR ${proto_dirs})
-            set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${DIR}")
-            file(RELATIVE_PATH RELATIVE_FILE ${THIRD_PARTY_DIR} ${FILE})
+            set(DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${DIR}")
+            file(RELATIVE_PATH RELATIVE_FILE ${DIR_PATH} ${FILE})
 
             if(NOT ${RELATIVE_FILE} MATCHES "\\.\\.")
                 list(APPEND proto_SOURCES_REL ${RELATIVE_FILE})

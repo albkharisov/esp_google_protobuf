@@ -18,7 +18,7 @@ add_subdirectory(protobuf/cmake EXCLUDE_FROM_ALL)
 add_library(alloc_pb src/alloc_pb.cpp)
 
 set(PROTO_LIB_NAME libprotobuf-lite)
-target_compile_options(${PROTO_LIB_NAME} PUBLIC -Wno-deprecated-enum-enum-conversion)
+target_compile_options(${PROTO_LIB_NAME} PRIVATE -Wno-deprecated-enum-enum-conversion)
 target_include_directories(${PROTO_LIB_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/local_include")
 
 set(INPUT_LIB_PB ${CMAKE_CURRENT_BINARY_DIR}/protobuf/cmake/${PROTO_LIB_NAME}.a)
@@ -28,16 +28,39 @@ set(OBJCOPY xtensa-esp32-elf-objcopy)
 # google-protobuf requires allocated memory by 8, so redefine operator new
 # to allocate 8 bytes only for this library
 add_custom_command(OUTPUT ${OUTPUT_LIB_PB}
-     COMMAND ${OBJCOPY} ${INPUT_LIB_PB} --redefine-sym _Znwj=__wrap_new8 --redefine-sym _ZdlPv=__wrap_delete8 ${OUTPUT_LIB_PB}
+     COMMAND
+        ${OBJCOPY}
+        ${INPUT_LIB_PB}
+        --redefine-sym _Znwj=__wrap_new8
+        --redefine-sym _ZdlPv=__wrap_delete8
+        ${OUTPUT_LIB_PB}
      DEPENDS ${PROTO_LIB_NAME}
      COMMENT "Creating ${PROTO_LIB_NAME} with wrapped new/delete"
      VERBATIM)
+add_custom_target(protobuf_lite_alloc8_generator DEPENDS ${OUTPUT_LIB_PB})
 
-add_custom_target(fixed_pb DEPENDS ${OUTPUT_LIB_PB})
-add_dependencies(${COMPONENT_LIB} fixed_pb)
+add_library(protobuf_lite_alloc8 STATIC IMPORTED GLOBAL)
+add_dependencies(protobuf_lite_alloc8 protobuf_lite_alloc8_generator)
+set_target_properties(protobuf_lite_alloc8 PROPERTIES IMPORTED_LOCATION "${OUTPUT_LIB_PB}")
 
-set_property(DIRECTORY "${COMPONENT_DIR}" APPEND PROPERTY
-     ADDITIONAL_CLEAN_FILES ${OUTPUT_LIB_PB})
+
+get_target_property(INCLUDE_DIRS protobuf::libprotobuf-lite INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(COMPILE_DEFS protobuf::libprotobuf-lite INTERFACE_COMPILE_DEFINITIONS)
+get_target_property(COMPILE_OPTS protobuf::libprotobuf-lite INTERFACE_COMPILE_OPTIONS)
+if(INCLUDE_DIRS)
+    set_target_properties(protobuf_lite_alloc8 PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${INCLUDE_DIRS}")
+endif()
+if(COMPILE_DEFS)
+    set_target_properties(protobuf_lite_alloc8 PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${COMPILE_DEFS}")
+endif()
+if(COMPILE_OPTS)
+    set_target_properties(protobuf_lite_alloc8 PROPERTIES INTERFACE_COMPILE_OPTIONS "${COMPILE_OPTS}")
+endif()
+
+add_library(protobuf::libprotobuf-lite ALIAS protobuf_lite_alloc8)
+add_dependencies(${COMPONENT_LIB} protobuf::libprotobuf-lite)
+
+set_property(DIRECTORY "${COMPONENT_DIR}" APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${OUTPUT_LIB_PB})
 
 target_link_libraries(${COMPONENT_LIB} INTERFACE
     ${OUTPUT_LIB_PB}
