@@ -7,4 +7,4 @@ license: MIT
 repository: https://github.com/albkharisov/esp_google_protobuf
 tags:
 - protobuf
-version: 1.0.7
+version: 1.0.11
